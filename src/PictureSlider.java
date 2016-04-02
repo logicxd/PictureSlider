@@ -403,7 +403,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 			lb.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					popUp.dispose();
-				}
+				} 
 			});
 			popUp.add(lb);
 		} catch (IOException e1) {
