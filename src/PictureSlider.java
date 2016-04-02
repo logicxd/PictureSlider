@@ -414,7 +414,6 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		popUp.pack();
 		popUp.setLocation(20, 20);
 		popUp.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
 	}
 
 	@Override
