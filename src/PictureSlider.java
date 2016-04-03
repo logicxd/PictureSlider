@@ -30,6 +30,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import java.util.Timer;
+
 @SuppressWarnings("serial")
 public class PictureSlider extends JFrame implements ChangeListener, MouseListener{
 
@@ -38,6 +40,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	private JButton resetBtn;
 	private JFileChooser fileChooser;
 	private JLabel welcomeLabel;
+	private JLabel picturePopUpLabel;
 	private JSlider slideBar;
 	private JLayeredPane layeredPane; 
 	private JRadioButton[] radioButton;
@@ -123,6 +126,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 						remove(welcomeLabel);
 						radioButton[0].setEnabled(false);
 						radioButton[1].setEnabled(false);
+						radioButton[2].setEnabled(false);
 						openDirectoryBtn.setEnabled(false);
 						initializeImgSize();
 						if (radioButton[0].isSelected()) {
@@ -132,8 +136,13 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 						} else if (radioButton[1].isSelected()) {
 							loadOption = 1;
 							loadViewingImg();
+						} else if (radioButton[2].isSelected() ) {
+							loadOption = 2;
+							setAllImages();
+							loadAllImages(); 
 						}
 						addSlideBar();
+						addPicturePopUpHint();
 						repaint();
 						revalidate();
 					}
@@ -143,8 +152,11 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 				} catch(InvalidFileException e1) {
 					JOptionPane.showMessageDialog(this, e1.getMessage(), "Error Opening Files", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
+				} catch(OutOfMemoryError e3) {
+					JOptionPane.showMessageDialog(this, "Out of memory: too many pictures to load", "Error", JOptionPane.ERROR_MESSAGE);
+					e3.printStackTrace();
 				} catch(Exception e2) {
-					JOptionPane.showMessageDialog(this, "Couldn't find any pictures", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(this, "Something went wrong and couldn't load pictures", "Error", JOptionPane.ERROR_MESSAGE);
 					e2.printStackTrace();
 				}
 			}
@@ -163,10 +175,12 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 			toolBar.addSeparator();
 			toolBar.add(radioButton[0]);
 			toolBar.add(radioButton[1]);
+			toolBar.add(radioButton[2]);
 			add(toolBar, BorderLayout.NORTH);
 			add(welcomeLabel, BorderLayout.CENTER);
 			radioButton[0].setEnabled(true);
 			radioButton[1].setEnabled(true);
+			radioButton[2].setEnabled(true);
 			openDirectoryBtn.setEnabled(true);
 			repaint();
 			revalidate();
@@ -174,18 +188,20 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		//////////////////////////////
 		
 		/////////Radio Button////////
-		radioButton = new JRadioButton[2];
-		radioButton[0] = new JRadioButton("Load all images selected (SLOW LOAD TIME)");
-		radioButton[0].setSelected(true);
-		radioButton[1] = new JRadioButton("Load only the pictures showing (LAGGY WHEN CHANGING PICTURES)");
+		radioButton = new JRadioButton[3];
+		radioButton[0] = new JRadioButton("Good Quality (SLOW load, HUGE memory, No lag)");
+		radioButton[1] = new JRadioButton("Med Quality (FAST load, minimal memory, LAGGY)");
+		radioButton[2] = new JRadioButton("Med Quality (MEDIUM load, SMALL memory, No lag)");
+		radioButton[2].setSelected(true);
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(radioButton[0]);
 		buttonGroup.add(radioButton[1]);
+		buttonGroup.add(radioButton[2]);
 		/////////////////////////////
 
 		//////////Welcome Label//////////
-		welcomeLabel = new JLabel("Select the folder that contains all your pictures."
-				+ " Also, resize this window before you load your pictures. Loading the pictures may take a while.");
+		welcomeLabel = new JLabel("You can resize this application before loading pictures. Select the folder that contains all your pictures. You could also select multiple picture files. "
+				+ "Loading the pictures may take a while.");
 		welcomeLabel.setHorizontalAlignment(JLabel.CENTER);
 		welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 15));
 		welcomeLabel.setMaximumSize(new Dimension (700,500));
@@ -198,6 +214,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		toolBar.addSeparator();
 		toolBar.add(radioButton[0]);
 		toolBar.add(radioButton[1]);
+		toolBar.add(radioButton[2]);
 		add(toolBar, BorderLayout.NORTH);
 		add(welcomeLabel, BorderLayout.CENTER);
 		////////////////////////
@@ -227,6 +244,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 						extension.equals(Utils.jpg) ||
 						extension.equals(Utils.png)
 						) {
+					System.out.println(file.getName());
 					files.add(file);
 				} 
 			}
@@ -246,7 +264,13 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		slideBar.setValue(0);
 		add(slideBar, BorderLayout.SOUTH);
 	}
-
+	private void addPicturePopUpHint() {
+		picturePopUpLabel = new JLabel("Click on the image to pop up.");
+		picturePopUpLabel.setHorizontalAlignment(JLabel.CENTER);
+		picturePopUpLabel.setVerticalAlignment(JLabel.BOTTOM);
+		add(picturePopUpLabel, BorderLayout.CENTER);
+	}
+	
 	private void initializeImgSize() {
 		IMAGE_WIDTH = this.getWidth() / 3;
 		IMAGE_HEIGHT = IMAGE_WIDTH;
@@ -315,11 +339,21 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	
 	private void setAllImages() {
 		images = new JLabel[IMAGE_COUNT];
+		org.apache.commons.lang3.time.StopWatch stopWatch = new org.apache.commons.lang3.time.StopWatch();
+		stopWatch.start();
 		try {
+			ImageIcon icon;
+			
 			for (int index = 0; index < IMAGE_COUNT; index++) {
 				BufferedImage img = ImageIO.read(files.get(index));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(index).getName());
+				if (loadOption == 0) {
+					Image scaledImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING);
+					icon = new ImageIcon(scaledImg, files.get(index).getName());
+				} else {
+					BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+					drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+					icon = new ImageIcon(drawnImg, files.get(index).getName());
+				}
 				images[index] = new JLabel(icon);
 				images[index].setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				images[index].addMouseListener(this);
@@ -327,6 +361,9 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		stopWatch.stop();
+		
+		System.out.println("Duration to load pictures: " + stopWatch.toString());
 	}
 
 	private void loadAllImages() {
@@ -358,7 +395,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 
 		add(layeredPane, BorderLayout.CENTER);
 	}
-
+	
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -367,7 +404,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		if (source.getValue() != currentImage) {
 			currentImage = source.getValue();
 			layeredPane.removeAll();
-			if (loadOption == 0) {
+			if (loadOption == 0 || loadOption == 2) {
 				loadAllImages();
 			} else if (loadOption == 1) {
 				loadViewingImg();
