@@ -23,14 +23,13 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-
-import java.util.Timer;
 
 @SuppressWarnings("serial")
 public class PictureSlider extends JFrame implements ChangeListener, MouseListener{
@@ -39,7 +38,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	private JButton openDirectoryBtn; 
 	private JButton resetBtn;
 	private JFileChooser fileChooser;
-	private JLabel welcomeLabel;
+	private JTextArea welcomeLabel;
 	private JLabel picturePopUpLabel;
 	private JSlider slideBar;
 	private JLayeredPane layeredPane; 
@@ -200,11 +199,23 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		/////////////////////////////
 
 		//////////Welcome Label//////////
-		welcomeLabel = new JLabel("You can resize this application before loading pictures. Select the folder that contains all your pictures. You could also select multiple picture files. "
-				+ "Loading the pictures may take a while.");
-		welcomeLabel.setHorizontalAlignment(JLabel.CENTER);
-		welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+		String welcomeMessage = "\n\nHow to Use Picture Slider\n\n"
+				+ "** Click Open and select the folder that contains all your pictures.\n"
+				+ "    Alternatively, you can select multiple picture files.\n\n"
+				+ "** Resize the application before opening files as they won't be resized after opened.\n\n"
+				+ "** Loading images can take a while. It may appear to be frozen but it is actually just loading images.\n"
+				+ "    Load up speed varies on the selected load up option.\n"
+				+ "    Should take about 1 minute for 200 pictures with third option while it takes 1 min for 80 pictures with the first option.\n\n"
+				+ "** After images load, you can click on the image to make view the original size image of the currently viewing image.\n"
+				+ "    Click on the pop up to close.\n\n";
+		
+		welcomeLabel = new JTextArea(welcomeMessage);
+		welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 17));
 		welcomeLabel.setMaximumSize(new Dimension (700,500));
+		welcomeLabel.setEditable(false);
+		welcomeLabel.setOpaque(false);
+		welcomeLabel.setWrapStyleWord(true);
+		welcomeLabel.setLineWrap(true);
 		//////////////////////////////////
 
 
@@ -339,8 +350,8 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	
 	private void setAllImages() {
 		images = new JLabel[IMAGE_COUNT];
-		org.apache.commons.lang3.time.StopWatch stopWatch = new org.apache.commons.lang3.time.StopWatch();
-		stopWatch.start();
+//		org.apache.commons.lang3.time.StopWatch stopWatch = new org.apache.commons.lang3.time.StopWatch();
+//		stopWatch.start();
 		try {
 			ImageIcon icon;
 			
@@ -361,9 +372,9 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		stopWatch.stop();
+//		stopWatch.stop();
 		
-		System.out.println("Duration to load pictures: " + stopWatch.toString());
+//		System.out.println("Duration to load pictures: " + stopWatch.toString());
 	}
 
 	private void loadAllImages() {
