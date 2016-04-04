@@ -295,50 +295,60 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		try {
 			if (currentImage-3 >= 0 && currentImage-3 < IMAGE_COUNT) {
 				BufferedImage img = ImageIO.read(files.get(currentImage-3));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_FAST);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(currentImage-3).getName());
+				BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+				ImageIcon icon = new ImageIcon(drawnImg, files.get(currentImage-3).getName());
 				JLabel imgLabel = new JLabel(icon);
 				imgLabel.addMouseListener(this);
 				imgLabel.setBounds(h_space, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+				imgLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				layeredPane.add(imgLabel, new Integer(0));
 			}
 
 			if (currentImage-2 >= 0 && currentImage-2 < IMAGE_COUNT) {
 				BufferedImage img = ImageIO.read(files.get(currentImage-2));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_FAST);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(currentImage-2).getName());
+				BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+				ImageIcon icon = new ImageIcon(drawnImg, files.get(currentImage-2).getName());
 				JLabel imgLabel = new JLabel(icon);
 				imgLabel.addMouseListener(this);
 				imgLabel.setBounds( Math.round((float) (IMAGE_WIDTH*width_multiplier)) + h_space, 30, IMAGE_WIDTH, IMAGE_HEIGHT);
+				imgLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				layeredPane.add(imgLabel, new Integer(1));
 			}
 
 			if (currentImage-1 >= 0 && currentImage-1 < IMAGE_COUNT) {
 				BufferedImage img = ImageIO.read(files.get(currentImage-1));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_FAST);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(currentImage-1).getName());
+				BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+				ImageIcon icon = new ImageIcon(drawnImg, files.get(currentImage-1).getName());
 				JLabel imgLabel = new JLabel(icon);
 				imgLabel.addMouseListener(this);
 				imgLabel.setBounds(Math.round((float) (IMAGE_WIDTH*width_multiplier*2))+h_space, 60, IMAGE_WIDTH, IMAGE_HEIGHT);
+				imgLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				layeredPane.add(imgLabel, new Integer(4));
 			}
 
 			if (currentImage >= 0 && currentImage < IMAGE_COUNT) {
 				BufferedImage img = ImageIO.read(files.get(currentImage));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_FAST);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(currentImage).getName());
+				BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+				ImageIcon icon = new ImageIcon(drawnImg, files.get(currentImage).getName());
 				JLabel imgLabel = new JLabel(icon);
 				imgLabel.addMouseListener(this);
 				imgLabel.setBounds(Math.round((float) (IMAGE_WIDTH*width_multiplier*3))+h_space, 30, IMAGE_WIDTH, IMAGE_HEIGHT);
+				imgLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				layeredPane.add(imgLabel, new Integer(3));
 			}
 			if (currentImage+1 >= 0 && currentImage+1 < IMAGE_COUNT) {
 				BufferedImage img = ImageIO.read(files.get(currentImage+1));
-				Image resizedImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_FAST);
-				ImageIcon icon = new ImageIcon(resizedImg, files.get(currentImage+1).getName());
+				BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
+				ImageIcon icon = new ImageIcon(drawnImg, files.get(currentImage+1).getName());
 				JLabel imgLabel = new JLabel(icon);
 				imgLabel.addMouseListener(this);
 				imgLabel.setBounds(Math.round((float) (IMAGE_WIDTH*width_multiplier*4))+h_space, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+				imgLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 4, true));
 				layeredPane.add(imgLabel, new Integer(2));
 			}
 		} catch (IOException e) {
@@ -350,8 +360,8 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	
 	private void setAllImages() {
 		images = new JLabel[IMAGE_COUNT];
-//		org.apache.commons.lang3.time.StopWatch stopWatch = new org.apache.commons.lang3.time.StopWatch();
-//		stopWatch.start();
+		org.apache.commons.lang3.time.StopWatch stopWatch = new org.apache.commons.lang3.time.StopWatch();
+		stopWatch.start();
 		try {
 			ImageIcon icon;
 			
@@ -361,7 +371,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 					Image scaledImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING);
 					icon = new ImageIcon(scaledImg, files.get(index).getName());
 				} else {
-					BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+					BufferedImage drawnImg = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 					drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
 					icon = new ImageIcon(drawnImg, files.get(index).getName());
 				}
@@ -372,9 +382,9 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		stopWatch.stop();
+		stopWatch.stop();
 		
-//		System.out.println("Duration to load pictures: " + stopWatch.toString());
+		System.out.println("Duration to load pictures: " + stopWatch.toString());
 	}
 
 	private void loadAllImages() {
