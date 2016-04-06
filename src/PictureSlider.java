@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -34,6 +36,27 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import net.coobird.thumbnailator.Thumbnails;
+
+//Copyright 2016 Aung Moe
+//
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//
+//For library used: net.coobird.thumbnailator
+//Github: https://github.com/coobird/thumbnailator
+
+
+
 @SuppressWarnings("serial")
 public class PictureSlider extends JFrame implements ChangeListener, MouseListener{
 
@@ -49,6 +72,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 	private ButtonGroup buttonGroup;
 	private int loadOption;
 	private JCheckBox sliderCheckBox;
+	private JCheckBox reorientCheckBox;
 
 	//Picture variables
 	private ArrayList<File> files = new ArrayList<File>();
@@ -112,66 +136,70 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		openDirectoryBtn = new JButton("Open");
 		openDirectoryBtn.setToolTipText("Select Picture");
 		openDirectoryBtn.setFont(new Font("Arial", Font.PLAIN, 14));
-		openDirectoryBtn.addActionListener( e -> {
-			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				try {
-					files.clear();
-					File[] selectedFiles = fileChooser.getSelectedFiles();
-					for (int index = 0; index < selectedFiles.length; index++) {
-						if (selectedFiles[index].isDirectory()) {
-							loadFromFolder(selectedFiles[index]);
+		openDirectoryBtn.addActionListener( new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					try {
+						files.clear();
+						File[] selectedFiles = fileChooser.getSelectedFiles();
+						for (int index = 0; index < selectedFiles.length; index++) {
+							if (selectedFiles[index].isDirectory()) {
+								loadFromFolder(selectedFiles[index]);
+							}
+							if (selectedFiles[index].isFile()) {
+								loadFromFile(selectedFiles[index]);
+							}
 						}
-						if (selectedFiles[index].isFile()) {
-							loadFromFile(selectedFiles[index]);
-						}
-					}
-					IMAGE_COUNT = files.size();
-					if (IMAGE_COUNT > 0) {
-						remove(welcomeLabel);
-						radioButton[0].setEnabled(false);
-						radioButton[1].setEnabled(false);
-						radioButton[2].setEnabled(false);
-						openDirectoryBtn.setEnabled(false);
-						viewingImgSet = new boolean[IMAGE_COUNT];
-						initializeImgSize();
-						setAllImageFrames();
-						if (radioButton[0].isSelected()) {
-							loadOption = 0;
-							showAllImageFrames(); 
-							startImageThread(0, IMAGE_COUNT-1);
-						} else if (radioButton[1].isSelected()) {
-							loadOption = 1;
-							showAllImageFrames();
-							if (IMAGE_COUNT >= 3)
-								startImageThread(0, 2);
-							else
+						IMAGE_COUNT = files.size();
+						if (IMAGE_COUNT > 0) {
+							remove(welcomeLabel);
+							radioButton[0].setEnabled(false);
+							radioButton[1].setEnabled(false);
+							radioButton[2].setEnabled(false);
+							openDirectoryBtn.setEnabled(false);
+							reorientCheckBox.setEnabled(false);
+							viewingImgSet = new boolean[IMAGE_COUNT];
+							initializeImgSize();
+							setAllImageFrames();
+							if (radioButton[0].isSelected()) {
+								loadOption = 0;
+								showAllImageFrames(); 
 								startImageThread(0, IMAGE_COUNT-1);
-						} else if (radioButton[2].isSelected() ) {
-							loadOption = 2;
-							showAllImageFrames(); 
-							startImageThread(0, IMAGE_COUNT-1);
+							} else if (radioButton[1].isSelected()) {
+								loadOption = 1;
+								showAllImageFrames();
+								if (IMAGE_COUNT >= 3)
+									startImageThread(0, 2);
+								else
+									startImageThread(0, IMAGE_COUNT-1);
+							} else if (radioButton[2].isSelected() ) {
+								loadOption = 2;
+								showAllImageFrames(); 
+								startImageThread(0, IMAGE_COUNT-1);
+							}
+							addSlideBar();
+							addPicturePopUpHint();
+							repaint();
+							revalidate();
 						}
-						addSlideBar();
-						addPicturePopUpHint();
-						repaint();
-						revalidate();
+						else {
+							throw new Exception("No Images Found.");
+						}
+					} catch(InvalidFileException e1) {
+						JOptionPane.showMessageDialog(null, e1.getMessage(), "Error Opening Files", JOptionPane.ERROR_MESSAGE);
+						e1.printStackTrace();
+					} catch(OutOfMemoryError e3) {
+						JOptionPane.showMessageDialog(null, "Out of memory: too many pictures to load", "Error", JOptionPane.ERROR_MESSAGE);
+						e3.printStackTrace();
+					} catch(IOException e4) {
+						JOptionPane.showMessageDialog(null, e4.getMessage(), "Error Opening Picture(s)", JOptionPane.ERROR_MESSAGE);
+						e4.printStackTrace();
 					}
-					else {
-						throw new Exception("No Images Found.");
+					catch(Exception e2) {
+						JOptionPane.showMessageDialog(null, "Something went wrong and couldn't load pictures", "Error", JOptionPane.ERROR_MESSAGE);
+						e2.printStackTrace();
 					}
-				} catch(InvalidFileException e1) {
-					JOptionPane.showMessageDialog(this, e1.getMessage(), "Error Opening Files", JOptionPane.ERROR_MESSAGE);
-					e1.printStackTrace();
-				} catch(OutOfMemoryError e3) {
-					JOptionPane.showMessageDialog(this, "Out of memory: too many pictures to load", "Error", JOptionPane.ERROR_MESSAGE);
-					e3.printStackTrace();
-				} catch(IOException e4) {
-					JOptionPane.showMessageDialog(this, e4.getMessage(), "Error Opening Picture(s)", JOptionPane.ERROR_MESSAGE);
-					e4.printStackTrace();
-				}
-				catch(Exception e2) {
-					JOptionPane.showMessageDialog(this, "Something went wrong and couldn't load pictures", "Error", JOptionPane.ERROR_MESSAGE);
-					e2.printStackTrace();
 				}
 			}
 		});
@@ -181,25 +209,30 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		resetBtn = new JButton("Reset");
 		resetBtn.setFont(new Font("Arial", Font.PLAIN, 14));
 		resetBtn.setToolTipText("Resets the PictureSldier");
-		resetBtn.addActionListener(e -> {
-			toolBar.removeAll();
-			getContentPane().removeAll();
-			toolBar.add(openDirectoryBtn);
-			toolBar.add(resetBtn);
-			toolBar.addSeparator();
-			toolBar.add(radioButton[0]);
-			toolBar.add(radioButton[1]);
-			toolBar.add(radioButton[2]);
-			toolBar.addSeparator();
-			toolBar.add(sliderCheckBox);
-			add(toolBar, BorderLayout.NORTH);
-			add(welcomeLabel, BorderLayout.CENTER);
-			radioButton[0].setEnabled(true);
-			radioButton[1].setEnabled(true);
-			radioButton[2].setEnabled(true);
-			openDirectoryBtn.setEnabled(true);
-			repaint();
-			revalidate();
+		resetBtn.addActionListener( new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				toolBar.removeAll();
+				getContentPane().removeAll();
+				toolBar.add(openDirectoryBtn);
+				toolBar.add(resetBtn);
+				toolBar.addSeparator();
+				toolBar.add(radioButton[0]);
+				toolBar.add(radioButton[1]);
+				toolBar.add(radioButton[2]);
+				toolBar.addSeparator();
+				toolBar.add(sliderCheckBox);
+				toolBar.add(reorientCheckBox);
+				add(toolBar, BorderLayout.NORTH);
+				add(welcomeLabel, BorderLayout.CENTER);
+				radioButton[0].setEnabled(true);
+				radioButton[1].setEnabled(true);
+				radioButton[2].setEnabled(true);
+				openDirectoryBtn.setEnabled(true);
+				reorientCheckBox.setEnabled(true);
+				repaint();
+				revalidate();				
+			}
 		});
 		//////////////////////////////
 		
@@ -219,6 +252,11 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		sliderCheckBox = new JCheckBox("Move pictures together with the slider");
 		sliderCheckBox.setSelected(true);
 		////////////////////////////////
+		
+		//////Slider Check Box ////////
+		reorientCheckBox = new JCheckBox("Rotate Pictures");
+		reorientCheckBox.setSelected(false);
+		////////////////////////////////
 
 		//////////Welcome Label//////////
 		String welcomeMessage = "\n\nHow to Use Picture Slider\n\n"
@@ -227,7 +265,9 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 				+ "    Make sure that there are at least 2 or more pictures, otherwise it won't work.\n\n"
 				+ "** Resize the application before opening files as they won't be resized after opened.\n\n"
 				+ "** After images load, you can click on the image to make view the original size image of the currently viewing image.\n"
-				+ "    Click on the pop up to close.\n\n";
+				+ "    Click on the pop up to close.\n\n"
+				+ "** Using 'Rotate Pictures' uses more memory space.\n\n"
+				+ "** Picture Slider can use a lot of memory when there are many pictures loaded.\n\n";
 		
 		welcomeLabel = new JTextArea(welcomeMessage);
 		welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 17));
@@ -248,6 +288,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		toolBar.add(radioButton[2]);
 		toolBar.addSeparator();
 		toolBar.add(sliderCheckBox);
+		toolBar.add(reorientCheckBox);
 		add(toolBar, BorderLayout.NORTH);
 		add(welcomeLabel, BorderLayout.CENTER);
 		////////////////////////
@@ -359,7 +400,6 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		}
 	}
 
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		JSlider source = (JSlider) e.getSource();
 		boolean moveWithSlider = sliderCheckBox.isSelected();
@@ -389,7 +429,6 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		revalidate();
 	}
 
-	@Override
 	public void mouseClicked(MouseEvent e) {
 		int screen_width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
 		int screen_height = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -399,10 +438,10 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		new_image_height = Math.round( (float) (new_image_height * .8));
 
 
-		JFrame popUp = new JFrame(files.get(currentImage-1).getName());
+		final JFrame popUp = new JFrame(files.get(currentImage-1).getName());
 		JLabel lb;
 		try {
-			BufferedImage img = ImageIO.read(files.get(currentImage-1));
+			BufferedImage img = Thumbnails.of(files.get(currentImage-1)).scale(1).asBufferedImage();
 			if (img.getHeight() > new_image_height || img.getWidth() > new_image_width) {
 				Image resizedImg = img.getScaledInstance(-1, new_image_height, Image.SCALE_SMOOTH);
 				lb = new JLabel(new ImageIcon(resizedImg));
@@ -424,30 +463,25 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		popUp.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
-	@Override
 	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void mousePressed(MouseEvent e) {
 		
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 
 	}
 
-	
 	class ImageLoader extends SwingWorker<ImageIcon, Void> {
 		private int index;
 		
@@ -458,7 +492,14 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		@Override
 		protected ImageIcon doInBackground() throws IOException{
 			ImageIcon icon;
-			BufferedImage img = ImageIO.read(files.get(index));
+			BufferedImage img;
+			
+			if (reorientCheckBox.isSelected()) {
+				img = Thumbnails.of(files.get(index)).scale(1).asBufferedImage();
+			} else {
+				img = ImageIO.read(files.get(index));
+			}
+			
 			if (loadOption == 0) {
 				Image scaledImg = img.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING);
 				icon = new ImageIcon(scaledImg, files.get(index).getName());
@@ -467,6 +508,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 				drawnImg.getGraphics().drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, null);
 				icon = new ImageIcon(drawnImg, files.get(index).getName());
 			}
+
 			viewingImgSet[index] = true;
 			return icon;
 		}
