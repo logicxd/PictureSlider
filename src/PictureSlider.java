@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -19,12 +20,15 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -52,7 +56,7 @@ import net.coobird.thumbnailator.Thumbnails;
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //
-//For library used: net.coobird.thumbnailator
+//For library used: net.coobird.thumbnailator (Maven)
 //Github: https://github.com/coobird/thumbnailator
 
 
@@ -60,20 +64,27 @@ import net.coobird.thumbnailator.Thumbnails;
 @SuppressWarnings("serial")
 public class PictureSlider extends JFrame implements ChangeListener, MouseListener{
 
+	//Load and Layout
+	private JFileChooser fileChooser;
+	private int loadOption;
+	private JLayeredPane layeredPane; 
+	private JSlider slideBar;
+	
+	private JPanel toolPanel;
 	private JToolBar toolBar;
 	private JButton openDirectoryBtn; 
 	private JButton resetBtn;
-	private JFileChooser fileChooser;
-	private JTextArea welcomeLabel;
-	private JLabel picturePopUpLabel;
-	private JSlider slideBar;
-	private JLayeredPane layeredPane; 
 	private JRadioButton[] radioButton;
 	private ButtonGroup buttonGroup;
-	private int loadOption;
-	private JCheckBox sliderCheckBox;
-	private JCheckBox reorientCheckBox;
+	private JMenuBar menuBar;
+	private JMenu optionsMenu;
+	private JCheckBoxMenuItem sliderCheckBox;
+	private JCheckBoxMenuItem reorientCheckBox;
 
+	//Labels
+	private JTextArea welcomeLabel;
+	private JLabel picturePopUpLabel;
+	
 	//Picture variables
 	private ArrayList<File> files = new ArrayList<File>();
 	private	JLabel[] images;
@@ -127,6 +138,10 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		});
 		///////////////////////
 
+		/////Tool Panel////////
+		toolPanel = new JPanel(new FlowLayout(FlowLayout.LEFT,5,5));
+		//////////////////////
+		
 		///////Tool bar////////
 		toolBar = new JToolBar();
 		toolBar.setFloatable(false);
@@ -205,25 +220,15 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		});
 		/////////////////////////
 		
-		//////Close Button///////////
+		//////Reset Button///////////
 		resetBtn = new JButton("Reset");
 		resetBtn.setFont(new Font("Arial", Font.PLAIN, 14));
 		resetBtn.setToolTipText("Resets the PictureSldier");
 		resetBtn.addActionListener( new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
-				toolBar.removeAll();
-				getContentPane().removeAll();
-				toolBar.add(openDirectoryBtn);
-				toolBar.add(resetBtn);
-				toolBar.addSeparator();
-				toolBar.add(radioButton[0]);
-				toolBar.add(radioButton[1]);
-				toolBar.add(radioButton[2]);
-				toolBar.addSeparator();
-				toolBar.add(sliderCheckBox);
-				toolBar.add(reorientCheckBox);
-				add(toolBar, BorderLayout.NORTH);
+				getContentPane().removeAll();		
+				add(toolPanel, BorderLayout.NORTH);
 				add(welcomeLabel, BorderLayout.CENTER);
 				radioButton[0].setEnabled(true);
 				radioButton[1].setEnabled(true);
@@ -238,39 +243,56 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		
 		/////////Radio Button////////
 		radioButton = new JRadioButton[3];
-		radioButton[0] = new JRadioButton("Good Quality (Slower load, higher memory)");
-		radioButton[1] = new JRadioButton("Med Quality (Load only the ones viewing)");
-		radioButton[2] = new JRadioButton("Med Quality (Load all)");
+		radioButton[0] = new JRadioButton("Good Quality");
+		radioButton[1] = new JRadioButton("Load Viewing");
+		radioButton[2] = new JRadioButton("Load all");
 		radioButton[2].setSelected(true);
+		radioButton[0].setFont(new Font("Arial", Font.PLAIN, 14));
+		radioButton[1].setFont(new Font("Arial", Font.PLAIN, 14));
+		radioButton[2].setFont(new Font("Arial", Font.PLAIN, 14));
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(radioButton[0]);
 		buttonGroup.add(radioButton[1]);
 		buttonGroup.add(radioButton[2]);
 		/////////////////////////////
 		
+		/////JMenuBar///////////////
+		menuBar = new JMenuBar();
+		////////////////////////////
+		
+		/////Menu Option//////////////
+		optionsMenu = new JMenu("Options");
+		optionsMenu.setFont(new Font("Arial", Font.PLAIN, 14));
+		/////////////////////////////
+		
 		//////Slider Check Box ////////
-		sliderCheckBox = new JCheckBox("Move pictures together with the slider");
+		sliderCheckBox = new JCheckBoxMenuItem("Move pictures together with the slider");
+		sliderCheckBox.setFont(new Font("Arial", Font.PLAIN, 14));
 		sliderCheckBox.setSelected(true);
 		////////////////////////////////
 		
 		//////Slider Check Box ////////
-		reorientCheckBox = new JCheckBox("Rotate Pictures");
+		reorientCheckBox = new JCheckBoxMenuItem("Rotate Pictures");
+		reorientCheckBox.setFont(new Font("Arial", Font.PLAIN, 14));
 		reorientCheckBox.setSelected(false);
 		////////////////////////////////
 
 		//////////Welcome Label//////////
-		String welcomeMessage = "\n\nHow to Use Picture Slider\n\n"
+		String welcomeMessage = "\nHow to Use Picture Slider\n\n"
 				+ "** Click Open and select the folder that contains all your pictures.\n"
 				+ "    Alternatively, you can select multiple picture files.\n"
-				+ "    Make sure that there are at least 2 or more pictures, otherwise it won't work.\n\n"
-				+ "** Resize the application before opening files as they won't be resized after opened.\n\n"
-				+ "** After images load, you can click on the image to make view the original size image of the currently viewing image.\n"
-				+ "    Click on the pop up to close.\n\n"
-				+ "** Using 'Rotate Pictures' uses more memory space.\n\n"
-				+ "** Picture Slider can use a lot of memory when there are many pictures loaded.\n\n";
+				+ "    Make sure that there are at least 2 or more pictures, otherwise it won't work.\n"
+				+ "** Resize the application before opening files as they won't be resized after opened.\n"
+				+ "** Picture Slider can use a lot of memory when there are many pictures loaded.\n\n"
+				+ " Load Option   Speed  Memory  Desciption\n"
+				+ "- - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+				+ "*Good Quality  Slow   Big     Loads all in high quality\n"
+				+ "*Load Viewing  Fast   Medium  Loads viewing pictures in med quality\n"
+				+ "*Load All      Fast   Medium  Loads all pictures in med quality\n"
+				+ "+'Rotate'      Slower Bigger  Gets the correct picture orientation\n";
 		
 		welcomeLabel = new JTextArea(welcomeMessage);
-		welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 17));
+		welcomeLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 17));
 		welcomeLabel.setMaximumSize(new Dimension (700,500));
 		welcomeLabel.setEditable(false);
 		welcomeLabel.setOpaque(false);
@@ -280,16 +302,19 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 
 
 		/////Add all to frame///
+		optionsMenu.add(sliderCheckBox);
+		optionsMenu.add(reorientCheckBox);
+		menuBar.add(optionsMenu);
+		toolPanel.add(menuBar);
+		toolBar.addSeparator();
 		toolBar.add(openDirectoryBtn);
 		toolBar.add(resetBtn);
 		toolBar.addSeparator();
 		toolBar.add(radioButton[0]);
 		toolBar.add(radioButton[1]);
 		toolBar.add(radioButton[2]);
-		toolBar.addSeparator();
-		toolBar.add(sliderCheckBox);
-		toolBar.add(reorientCheckBox);
-		add(toolBar, BorderLayout.NORTH);
+		toolPanel.add(toolBar);
+		add(toolPanel, BorderLayout.NORTH);
 		add(welcomeLabel, BorderLayout.CENTER);
 		////////////////////////
 
