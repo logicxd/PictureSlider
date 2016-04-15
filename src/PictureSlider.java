@@ -274,7 +274,7 @@ public class PictureSlider extends JFrame implements ChangeListener, MouseListen
 		//////Slider Check Box ////////
 		reorientCheckBox = new JCheckBoxMenuItem("Rotate Pictures");
 		reorientCheckBox.setFont(new Font("Arial", Font.PLAIN, 14));
-		reorientCheckBox.setSelected(false);
+		reorientCheckBox.setSelected(true);
 		////////////////////////////////
 
 		//////////Welcome Label//////////
