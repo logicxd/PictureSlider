@@ -1,0 +1,13 @@
+#Ignore every file
+*
+
+#Except these
+!.gitignore
+!README.md
+
+!Jars
+!Jars/*
+
+!src
+!src/*
+
