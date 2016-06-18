@@ -1,0 +1,24 @@
+
+
+Version:	3.8
+CmdLine:	C:\Users\logic\Desktop\PictureSlider_v0.4.1.exe --l4j-debug
+WOW64:		yes
+Working dir:	C:\Users\logic\Desktop\.
+64-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8.0_74
+Check launcher:	C:\Program Files\Java\jre1.8.0_74\bin\javaw.exe (OK)
+Match:		1.8.0_74
+64-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8.0_72
+Ignore:		1.8.0_72
+Runtime used:	1.8.0_74 (64-bit)
+Heap -Xms:	Requested 0 MB / 20%, Available: 2451 MB, Heap size: 490 MB
+Heap -Xmx:	Requested 0 MB / 85%, Available: 2451 MB, Heap size: 2083 MB
+Launcher:	C:\Program Files\Java\jre1.8.0_74\bin\javaw.exe
+Launcher args:	-Xms490m -Xmx2083m -jar "C:\Users\logic\Desktop\PictureSlider_v0.4.1.exe"
+Args length:	73/32768 chars
+Exit code:	0
