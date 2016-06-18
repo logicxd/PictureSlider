@@ -1,0 +1,15 @@
+#Ignore every file
+*
+
+#
+!.gitignore
+
+#Except these
+!README.md
+
+!Downloads
+!Downloads/*
+
+!src
+!src/*
+
