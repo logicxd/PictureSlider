@@ -1,6 +1,6 @@
 <h1>PictureSlider</h1>
 
-Displays your pictures that you can quickly view through by sliding!
+Displays pictures that you can quickly view through by sliding!
 
 <h3>Functions</h3>
 <ul>
